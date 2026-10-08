@@ -29,7 +29,7 @@ the people who came before me:
 
 mont127's [Neutron](https://github.com/mont127/Neutron) is also a similar idea, but implemented differently. 
 
-[Gio](https://github.com/giodotblue) was working on a the same idea that is NotProton prior to the release of NotProton itself. 
+[Gio](https://github.com/giodotblue) was working enabling Steam Play inside of Steam on macOS prior to the release of NotProton itself. 
 I would have done things differently had I been aware of that. 
 
 Thanks to everyone who has positively contributed to macOS gaming. 
