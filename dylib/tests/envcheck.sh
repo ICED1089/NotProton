@@ -36,6 +36,32 @@ WINEDLLOVERRIDES="lsteamclient=n"
 eval "$overrides_line"
 is "trio outranks user" "lsteamclient=n;steamclient=n;steamclient64=n;lsteamclient=b" "$WINEDLLOVERRIDES"
 
+echo "== Apple GPTK initialization and launcher environment =="
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+np_support="$work/Application Support/notproton"
+np_build="test"
+library="$np_support/runners/crossover-$np_build/CrossOver/lib64/apple_gptk/external/libd3dshared.dylib"
+init=$(sed -n '/^CX_ROOT=/,/^wine_unix=/p' "$SRC")
+# shellcheck disable=SC2016 # Match the literal launcher loop.
+forward=$(sed -n '/^for name in $(env /,/^done$/p' "$SRC")
+[ -n "$init" ] && [ -n "$forward" ] || { echo "FAIL: runner environment blocks not found"; exit 1; }
+unset CX_APPLEGPTK_LIBD3DSHARED_PATH
+eval "$init"
+is "runner without the library leaves the path unset" "" "${CX_APPLEGPTK_LIBD3DSHARED_PATH:-}"
+mkdir -p "$(dirname "$library")"
+: > "$library"
+eval "$init"
+is "bundled library is selected" "$library" "${CX_APPLEGPTK_LIBD3DSHARED_PATH:-}"
+is "helpers inherit the library path" "$library" "$(sh -c 'printf %s "$CX_APPLEGPTK_LIBD3DSHARED_PATH"')"
+set --
+eval "$forward"
+forwarded=""
+for arg in "$@"; do
+  case "$arg" in CX_APPLEGPTK_LIBD3DSHARED_PATH=*) forwarded=${arg#*=} ;; esac
+done
+is "game launcher receives the path as one argument" "$library" "$forwarded"
+
 if [ "$fails" -eq 0 ]; then
 	echo "==> envcheck: all assertions hold"
 else
