@@ -21,3 +21,15 @@ documentation is quite sparse. Sorry about that, I'll improve it shortly. For re
 Please read NOTICE for license information.
 
 Please open issue reports with any issues. PRs are welcome and encouraged. Contributions policy to come shortly.
+
+There are many people who worked on similar ideas, similar projects. I did not base their work, but I still want to give thanks to 
+the people who came before me:
+
+[Nat Brown](https://github.com/natbro) made [Kaon](https://github.com/natbro/kaon), which is similar in goals to NotProton.
+
+mont127's [Neutron](https://github.com/mont127/Neutron) is also a similar idea, but implemented differently. 
+
+[Gio](https://github.com/giodotblue) was working on a the same idea that is NotProton prior to the release of NotProton itself. 
+I would have done things differently had I been aware of that. 
+
+Thanks to everyone who has positively contributed to macOS gaming. 
