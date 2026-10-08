@@ -126,7 +126,7 @@ struct NotProtonApp: App {
             if prefixes.tools.count > 1 {
                 Menu(PrefixPrompt.rebuildButton(selectionTargets)) {
                     ForEach(prefixes.tools) { tool in
-                        Button(tool.shortDisplay) {
+                        Button(tool.display) {
                             prefixes.pendingConfirmation = .rebuild(selectionTargets, tool)
                         }
                     }

@@ -25,7 +25,7 @@ final class PrefixesModel {
     private(set) var currentTools: [String: InstalledTool] = [:]
 
     func lastTool(_ prefix: WinePrefix) -> String? {
-        if let tool = currentTools[prefix.id] { return tool.shortDisplay }
+        if let tool = currentTools[prefix.id] { return tool.display }
         guard let record = records[prefix.id] else { return nil }
         return record.display ?? SupportedRunners.displayVersion(forID: record.build)
     }

@@ -343,7 +343,7 @@ struct PrefixesView: View {
     @ViewBuilder
     private func rebuildChoices(_ targets: [WinePrefix], label: String? = nil) -> some View {
         ForEach(model.tools) { tool in
-            Button(label ?? tool.shortDisplay) {
+            Button(label ?? tool.display) {
                 model.pendingConfirmation = .rebuild(targets, tool)
             }
         }
