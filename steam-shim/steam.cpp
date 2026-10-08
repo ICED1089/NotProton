@@ -119,6 +119,22 @@ static void set_client_dll_paths(void)
                     "SteamPath", REG_SZ, steam_dir, (DWORD)sizeof(steam_dir));
 }
 
+/* Values Proton's wine.inf sets. Ubisoft Connect needs them to see Steam. */
+static void set_install_paths(void)
+{
+    static const char install_dir[] = "C:\\Program Files (x86)\\Steam";
+    static const char steam_exe[] = "C:\\Program Files (x86)\\Steam\\steam.exe";
+
+    RegSetKeyValueA(HKEY_LOCAL_MACHINE, "Software\\Wow6432Node\\Valve\\Steam",
+                    "InstallPath", REG_SZ, install_dir, (DWORD)sizeof(install_dir));
+    RegSetKeyValueA(HKEY_LOCAL_MACHINE, "Software\\Valve\\Steam",
+                    "InstallPath", REG_SZ, install_dir, (DWORD)sizeof(install_dir));
+    RegSetKeyValueA(HKEY_CURRENT_USER, "Software\\Valve\\Steam",
+                    "SteamExe", REG_SZ, steam_exe, (DWORD)sizeof(steam_exe));
+    RegSetKeyValueA(HKEY_CURRENT_USER, "Software\\Valve\\Steam\\ActiveProcess",
+                    "SteamPath", REG_SZ, install_dir, (DWORD)sizeof(install_dir));
+}
+
 static DWORD WINAPI create_steam_window(void *arg)
 {
     static WNDCLASSEXW wndclass = { sizeof(WNDCLASSEXW) };
@@ -1795,6 +1811,7 @@ int main(int argc, char *argv[])
 
         set_active_process_pid();
         set_client_dll_paths();
+        set_install_paths();
 
         if (steam_client_init())
         {
