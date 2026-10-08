@@ -37,6 +37,10 @@ np_display=$(sed -n 's/.*"display_name"[[:space:]]*"\(.*\)".*/\1/p' \
 [ -n "$np_display" ] || np_display="CrossOver build ${np_build:-unknown}"
 CX_ROOT="$np_support/runners/crossover-$np_build/CrossOver"
 export CX_ROOT
+# CrossOver initializes Rosetta's Windows thread-state support even without D3DMetal.
+if [ -f "$CX_ROOT/lib64/apple_gptk/external/libd3dshared.dylib" ]; then
+  export CX_APPLEGPTK_LIBD3DSHARED_PATH="$CX_ROOT/lib64/apple_gptk/external/libd3dshared.dylib"
+fi
 
 wine_unix="$CX_ROOT/lib/wine/aarch64-unix"
 WINELOADER="$wine_unix/wine.app/Contents/MacOS/wine"
@@ -1355,7 +1359,7 @@ else
   echo "=== client staged no overlay renderer, overlay disabled ===" >> "$log" 2>&1 || true
 fi
 set -- --args "$shim_exe" "$@"
-for name in $(env | sed -nE 's/^(Steam[A-Za-z0-9]*|(CX_GRAPHICS|D3DM_|DXMT_|DXVK_|MTL_|ROSETTA_)[A-Z0-9_]*)=.*/\1/p'); do
+for name in $(env | sed -nE 's/^(CX_APPLEGPTK_LIBD3DSHARED_PATH|Steam[A-Za-z0-9]*|(CX_GRAPHICS|D3DM_|DXMT_|DXVK_|MTL_|ROSETTA_)[A-Z0-9_]*)=.*/\1/p'); do
   eval "value=\$$name"
   # shellcheck disable=SC2154 # eval assigns value on the line above
   set -- --env "$name=$value" "$@"
