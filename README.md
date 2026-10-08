@@ -22,8 +22,8 @@ Please read NOTICE for license information.
 
 Please open issue reports with any issues. PRs are welcome and encouraged. Contributions policy to come shortly.
 
-There are many people who worked on similar ideas, similar projects. I did not base their work, but I still want to give thanks to 
-the people who came before me:
+There are many people who worked on similar ideas, similar projects. I did not base NotProton on their work, but I still want to 
+give thanks to the people who came before me:
 
 [Nat Brown](https://github.com/natbro) made [Kaon](https://github.com/natbro/kaon), which is similar in goals to NotProton.
 
