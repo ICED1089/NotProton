@@ -5,9 +5,9 @@ NotProton enables the Steam Play experience from Linux Steam in the macOS Steam 
 This is done by forcibly enabling the Steam Play functionality in macOS Steam (which is
 present and inert) as well as by porting some components of Valve's Proton to macOS.
 
-This tool is intended to be used with Steam Client 1788652215 or 1790121765 and **CrossOver Preview
-20261006 or 2026082**. Both the FEX build and the Rosetta build are supported. The Rosetta build is
-the recommended version, as the FEX one is in an early state.
+This tool is intended to be used with Steam Client 1788652215 or 1790121765 and **CrossOver 26.3 or CrossOver Preview
+20261006 or 2026082**. Both the FEX and the Rosetta versions are supported. I recommend using the FEX version of the 
+Preview 20261006, as it includes both the FEX version as well as the Rosetta one. 
 
 The macOS app itself is located in the ```app``` folder. The core logic is in ```dylib```.
 ```lsteamclient``` is a macOS port of Valve's lsteamclient. ```steam-shim```is a port of Valve's
@@ -16,7 +16,7 @@ makes/places in the ```~/Library/Application Support/notproton/runners/``` folde
 lsteamclient is loaded.
 
 This release is coming several days past when I wanted to release it, so the
-documentation is quite sparse. Sorry about that, I'll improve it shortly.
+documentation is quite sparse. Sorry about that, I'll improve it shortly. For real this time.
 
 Please read NOTICE for license information.
 
