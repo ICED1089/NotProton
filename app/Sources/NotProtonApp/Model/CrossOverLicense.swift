@@ -123,8 +123,27 @@ enum CrossOverLicense {
         )
     }
 
+    // One entitlement verdict for the UI, Steam install, and runner setup.
+    // Keep CodeWeavers' cryptographic purchased-license check as the first option.
+    static func check(
+        for install: CrossOverInstall,
+        paidCheck: (URL) -> Status = { CrossOverLicense.check(crossOverRoot: $0) },
+        trialCheck: (CrossOverInstall) -> Bool = { CrossOverTrial.isActive(for: $0) }
+    ) -> Status {
+        let paid = paidCheck(install.crossOverRoot)
+        if paid.licensed { return paid }
+        guard trialCheck(install) else { return paid }
+        let trial = Status(
+            licensed: true,
+            detail: "CrossOver trial is active.",
+            diagnostic: "active CrossOver trial"
+        )
+        AppLog.note("license: \(trial.diagnostic)")
+        return trial
+    }
+
     static func requireValid(for install: CrossOverInstall) throws {
-        let status = check(crossOverRoot: install.crossOverRoot)
+        let status = check(for: install)
         guard status.licensed else {
             throw StepFailure(
                 step: "Verify CrossOver license",

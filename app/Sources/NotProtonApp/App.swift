@@ -8,14 +8,13 @@ struct NotProtonApp: App {
     @State private var status = SystemStatus()
     @State private var prefixes = PrefixesModel()
     @State private var pane: Pane = .status
-    private let updater = AppUpdater()
 
     init() {
         AppLog.start()
     }
 
     var body: some Scene {
-        Window("NotProton", id: "main") {
+        Window("NotProton — Trial Fork", id: "main") {
             RootView(pane: $pane)
                 .environment(status)
                 .environment(prefixes)
@@ -34,7 +33,11 @@ struct NotProtonApp: App {
         CommandGroup(replacing: .newItem) {}
 
         CommandGroup(after: .appInfo) {
-            Button("Check for Updates…") { updater.check() }
+            Button("View Trial Fork on GitHub…") {
+                if let url = URL(string: "https://github.com/ICED1089/NotProton") {
+                    NSWorkspace.shared.open(url)
+                }
+            }
         }
 
         CommandGroup(after: .sidebar) {

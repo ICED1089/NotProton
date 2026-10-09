@@ -30,7 +30,7 @@ struct StatusSnapshot: Sendable {
         let installs = CrossOverSource.discover()
         var licenses: [String: CrossOverLicense.Status] = [:]
         for install in installs where install.isUsable {
-            licenses[install.id] = CrossOverLicense.check(crossOverRoot: install.crossOverRoot)
+            licenses[install.id] = CrossOverLicense.check(for: install)
         }
 
         let runner = RunnerStore.state()
@@ -171,7 +171,7 @@ final class SystemStatus {
     func checkLicense(for chosen: CrossOverInstall? = nil) async -> CrossOverLicense.Status? {
         guard let install = chosen ?? usableCrossOver else { return nil }
         let status = await Task.detached(priority: .userInitiated) {
-            CrossOverLicense.check(crossOverRoot: install.crossOverRoot)
+            CrossOverLicense.check(for: install)
         }.value
         snapshot?.crossOverLicense[install.id] = status
         return status
@@ -415,7 +415,7 @@ final class SystemStatus {
             let state = await Task.detached(priority: .userInitiated) {
                 (runner: RunnerStore.state(),
                  payload: PayloadInspector.inspect(),
-                 license: install.map { CrossOverLicense.check(crossOverRoot: $0.crossOverRoot) })
+                 license: install.map { CrossOverLicense.check(for: $0) })
             }.value
 
             if let install, state.license?.licensed == true, state.runner == .none {
