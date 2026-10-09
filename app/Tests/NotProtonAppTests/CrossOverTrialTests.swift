@@ -122,3 +122,16 @@ struct TrialAwareLicenseTests {
         #expect(!calledTrial)
     }
 }
+
+@Suite("CrossOver runtime provenance")
+struct CrossOverRuntimeProvenanceTests {
+    @Test("An ad-hoc or unknown bundle without pinned runtime hashes is refused")
+    func unknownRuntimeIsRefused() throws {
+        let root = URL.temporaryDirectory.appending(path: "np-provenance-\(UUID().uuidString)")
+        let bundle = root.appending(path: "CrossOver.app")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let wine = SupportPaths.crossOverRoot(inBundle: bundle).appending(path: "lib/wine")
+        try FileManager.default.createDirectory(at: wine, withIntermediateDirectories: true)
+        #expect(!CrossOverTrial.isRecognizedCrossOver(bundle))
+    }
+}

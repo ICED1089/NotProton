@@ -12,7 +12,7 @@ enum CrossOverTrial {
         for install: CrossOverInstall,
         preferences: URL = defaultPreferences,
         now: Date = Date(),
-        verifySignature: (URL) -> Bool = isOfficialCrossOver
+        verifySignature: (URL) -> Bool = isRecognizedCrossOver
     ) -> Bool {
         // Only recognize genuine, installed CrossOver bundles, not Wine stand-ins.
         guard CrossOverSource.looksLikeCrossOver(install.bundle) else {
@@ -20,7 +20,7 @@ enum CrossOverTrial {
             return false
         }
         guard verifySignature(install.bundle) else {
-            AppLog.note("trial: CodeWeavers app signature not verified")
+            AppLog.note("trial: neither CodeWeavers signature nor pinned runtime fingerprints verified")
             return false
         }
         guard let data = try? Data(contentsOf: preferences),
@@ -49,6 +49,32 @@ enum CrossOverTrial {
                   installedBuild.id == build.id
             else { return false }
             return isActive(for: install)
+        }
+    }
+
+    // Stock CrossOver apps may not expose a CodeWeavers Developer ID in
+    // codesign output (e.g. TeamIdentifier=not set). For those installs,
+    // verify the installed Wine runtime against NotProton's upstream-pinned
+    // release fingerprints instead of trusting a bundle name or editable plist.
+    // This is an identity check for the runtime, not a CrossOver license bypass.
+    static func isRecognizedCrossOver(_ bundle: URL) -> Bool {
+        if isOfficialCrossOver(bundle) {
+            AppLog.note("trial: trusted CodeWeavers Developer ID signature")
+            return true
+        }
+
+        let inspected = CrossOverSource.inspect(bundle: bundle)
+        guard case .supported(let build) = inspected.support else {
+            AppLog.note("trial: no recognized CodeWeavers signature or supported runtime hash")
+            return false
+        }
+        do {
+            try CrossOverSource.verifyPatchInputs(root: inspected.crossOverRoot, build: build)
+            AppLog.note("trial: verified pinned Wine loader and ntdll fingerprints for \(build.id)")
+            return true
+        } catch {
+            AppLog.note("trial: Wine runtime fingerprint mismatch: \(error.localizedDescription)")
+            return false
         }
     }
 
