@@ -5,9 +5,6 @@ import Foundation
 enum CrossOverTrial {
     static let duration: TimeInterval = 14 * 24 * 60 * 60
 
-    // CodeWeavers' Apple Developer ID team. Never trust an arbitrary app with the right name.
-    static let codeWeaversTeamID = "9C6B7X7Z8E"
-
     static let defaultPreferences = FileManager.default.homeDirectoryForCurrentUser
         .appending(path: "Library/Preferences/com.codeweavers.CrossOver.plist")
 
@@ -52,9 +49,13 @@ enum CrossOverTrial {
               ]), identity.succeeded
         else { return false }
 
-        // codesign emits identity metadata on stderr.
+        // The actual CodeWeavers Team ID is not publicly documented. Verify
+        // the Apple Developer ID signing authority rather than guessing an ID.
+        // codesign emits the signer chain to stderr.
         return identity.stderr.split(separator: "\n")
-            .contains { $0.trimmingCharacters(in: .whitespacesAndNewlines)
-                == "TeamIdentifier=\(codeWeaversTeamID)" }
+            .contains { line in
+                let authority = line.trimmingCharacters(in: .whitespacesAndNewlines)
+                return authority.hasPrefix("Authority=Developer ID Application: CodeWeavers")
+            }
     }
 }
