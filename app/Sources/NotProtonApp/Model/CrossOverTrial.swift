@@ -42,7 +42,7 @@ enum CrossOverTrial {
         }
     }
 
-    private static func isOfficialCrossOver(_ bundle: URL) -> Bool {
+    static func isOfficialCrossOver(_ bundle: URL) -> Bool {
         let path = bundle.path(percentEncoded: false)
         guard let verified = try? Shell.run("/usr/bin/codesign", [
             "--verify", "--strict", path,
