@@ -12,7 +12,10 @@ struct SupportedRunnerTests {
     func rowsAreComplete() {
         #expect(!SupportedRunners.all.isEmpty)
 
-        for build in SupportedRunners.all {
+        let rebuilt = SupportedRunners.all.flatMap { build in
+            build.rebuilds.compactMap { build.matching(loaderSHA256: $0.loaderSHA256) }
+        }
+        for build in SupportedRunners.all + rebuilt {
             expectSHA256(build.loaderSHA256, "loader for \(build.id)")
             #expect(!build.cleanNtdll.isEmpty, "\(build.id) patches nothing")
             #expect(Set(build.cleanNtdll.keys) == Set(build.patchedNtdll.keys), "\(build.id) is lopsided")
@@ -36,8 +39,25 @@ struct SupportedRunnerTests {
         let ids = SupportedRunners.all.map(\.id)
         #expect(Set(ids).count == ids.count)
 
-        let loaders = SupportedRunners.all.map(\.loaderSHA256)
+        let loaders = SupportedRunners.all.flatMap { [$0.loaderSHA256] + $0.rebuilds.map(\.loaderSHA256) }
         #expect(Set(loaders).count == loaders.count)
+    }
+
+    @Test("A rebuild is found as its build, carrying its own hashes")
+    func rebuildResolvesToItsBuild() throws {
+        let build = try #require(SupportedRunners.build(id: "26.3.0.39832"))
+        let rebuild = try #require(build.rebuilds.first)
+
+        let found = try #require(SupportedRunners.build(loaderSHA256: rebuild.loaderSHA256))
+        #expect(found.id == build.id)
+        #expect(found.tools == build.tools)
+        #expect(found.loaderSHA256 == rebuild.loaderSHA256)
+        #expect(found.cleanNtdll == rebuild.cleanNtdll)
+        #expect(found.patchedNtdll == rebuild.patchedNtdll)
+        #expect(NtdllPatcher.patches(for: found).map(\.arch) == NtdllPatcher.patches(for: build).map(\.arch))
+
+        #expect(SupportedRunners.build(loaderSHA256: build.loaderSHA256) == build)
+        #expect(build.matching(loaderSHA256: String(rebuild.loaderSHA256.dropLast())) == nil)
     }
 
     @Test("The first supported build keeps a bare version as its id")

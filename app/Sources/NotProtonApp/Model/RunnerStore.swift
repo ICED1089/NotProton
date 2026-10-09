@@ -81,8 +81,16 @@ enum RunnerStore {
 
     static func installedBuilds(in runners: URL = SupportPaths.runners) -> [RunnerBuild] {
         clonedBuilds(in: runners)
-            .compactMap(SupportedRunners.build(id:))
+            .compactMap { build(cloned: $0, runners: runners) }
             .filter { RunnerInstaller.hasClone(forBuild: $0.id, runners: runners) }
+    }
+
+    private static func build(cloned id: String, runners: URL) -> RunnerBuild? {
+        guard let build = SupportedRunners.build(id: id) else { return nil }
+        guard !build.rebuilds.isEmpty else { return build }
+        let root = SupportPaths.clonedRoot(forBuild: id, runners: runners)
+        let loader = Clean.copy(of: CrossOverSource.unixLoader(inRoot: root))
+        return Digest.sha256IfPresent(loader).flatMap(build.matching(loaderSHA256:)) ?? build
     }
 }
 
