@@ -68,7 +68,7 @@ enum RunnerSetup {
 
         let root = SupportPaths.clonedRoot(forBuild: build.id, runners: runners)
         let status = license(root)
-        guard status.licensed else {
+        guard status.licensed || CrossOverTrial.isActive(forBuild: build) else {
             throw StepFailure(step: "Verify CrossOver license", detail: status.detail)
         }
 
