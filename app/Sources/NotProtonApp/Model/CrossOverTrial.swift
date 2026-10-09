@@ -15,18 +15,31 @@ enum CrossOverTrial {
         verifySignature: (URL) -> Bool = isOfficialCrossOver
     ) -> Bool {
         // Only recognize genuine, installed CrossOver bundles, not Wine stand-ins.
-        guard CrossOverSource.looksLikeCrossOver(install.bundle),
-              verifySignature(install.bundle),
-              let data = try? Data(contentsOf: preferences),
+        guard CrossOverSource.looksLikeCrossOver(install.bundle) else {
+            AppLog.note("trial: installed CrossOver payload is missing")
+            return false
+        }
+        guard verifySignature(install.bundle) else {
+            AppLog.note("trial: CodeWeavers app signature not verified")
+            return false
+        }
+        guard let data = try? Data(contentsOf: preferences),
               let plist = try? PropertyListSerialization.propertyList(from: data, format: nil),
-              let values = plist as? [String: Any],
-              let firstRun = values["FirstRunDate"] as? Date
-        else { return false }
+              let values = plist as? [String: Any] else {
+            AppLog.note("trial: CrossOver preferences not readable")
+            return false
+        }
+        guard let firstRun = values["FirstRunDate"] as? Date else {
+            AppLog.note("trial: FirstRunDate not present as a date; trial source needs verification")
+            return false
+        }
 
         let elapsed = now.timeIntervalSince(firstRun)
         // FirstRunDate is a local preference, not an authoritative CodeWeavers expiry
         // API. Reject missing, future, and expired dates; don't reset the trial.
-        return elapsed >= 0 && elapsed < duration
+        let active = elapsed >= 0 && elapsed < duration
+        AppLog.note(active ? "trial: date indicates an active 14-day trial" : "trial: date absent from active window")
+        return active
     }
 
     static func isActive(forBuild build: RunnerBuild) -> Bool {

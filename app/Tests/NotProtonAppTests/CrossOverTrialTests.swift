@@ -77,3 +77,48 @@ struct CrossOverTrialTests {
         ))
     }
 }
+
+@Suite("Trial-aware license verdict")
+struct TrialAwareLicenseTests {
+    private let install = CrossOverInstall(
+        bundle: URL(filePath: "/tmp/fake-CrossOver.app"),
+        releaseVersion: nil, support: .unreadable
+    )
+    private let paid = CrossOverLicense.Status(
+        licensed: false, detail: CrossOverLicense.notActivated,
+        diagnostic: "no paid license"
+    )
+
+    @Test("An active trial is treated as activated throughout setup")
+    func trialAccepted() {
+        let status = CrossOverLicense.check(
+            for: install, paidCheck: { _ in paid }, trialCheck: { _ in true }
+        )
+        #expect(status.licensed)
+        #expect(status.detail == "CrossOver trial is active.")
+    }
+
+    @Test("An inactive trial does not hide the paid-license failure")
+    func inactiveTrialDenied() {
+        let status = CrossOverLicense.check(
+            for: install, paidCheck: { _ in paid }, trialCheck: { _ in false }
+        )
+        #expect(!status.licensed)
+        #expect(status.diagnostic == paid.diagnostic)
+    }
+
+    @Test("A valid purchased license is accepted without consulting trial state")
+    func paidLicenseUnchanged() {
+        var calledTrial = false
+        let status = CrossOverLicense.check(
+            for: install,
+            paidCheck: { _ in CrossOverLicense.Status(
+                licensed: true, detail: "CrossOver is activated.",
+                diagnostic: "valid signed license"
+            ) },
+            trialCheck: { _ in calledTrial = true; return false }
+        )
+        #expect(status.licensed)
+        #expect(!calledTrial)
+    }
+}
