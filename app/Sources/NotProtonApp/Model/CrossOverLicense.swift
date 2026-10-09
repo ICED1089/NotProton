@@ -125,7 +125,7 @@ enum CrossOverLicense {
 
     static func requireValid(for install: CrossOverInstall) throws {
         let status = check(crossOverRoot: install.crossOverRoot)
-        guard status.licensed else {
+        guard status.licensed || CrossOverTrial.isActive(for: install) else {
             throw StepFailure(
                 step: "Verify CrossOver license",
                 detail: status.detail
